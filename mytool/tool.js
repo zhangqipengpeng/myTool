@@ -26,3 +26,27 @@ String.prototype.queryURLParams = function queryURLParams() {
 };
 
 
+//offset:获取元素距离body的左和上偏移量 Get the left and up offsets of the current element from the body
+function offset(element) {
+    //获取当前元素的父参照物和其距离父参照物的偏移
+    let parent = element.offsetParent,
+        top = element.offsettop,
+        left = element.offsetLeft;
+    //循环依次向上查找父参照物（一直到找不到为止）
+    while (parent) {
+        if (!/MSIE 8/.test(navigator.userAgent)) {
+            left += parent.clientLeft;
+            top += parent.clientTop;
+        };
+        //加上父参照物的偏移量
+        left += parent.offsetLeft;
+        top += parent.offsetTop;
+        //继续向上查找
+        parent = parent.offsetParent;
+    };
+    //把查找的结果返回
+    return {
+        top,
+        left
+    }
+};
