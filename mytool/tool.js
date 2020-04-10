@@ -25,28 +25,79 @@ String.prototype.queryURLParams = function queryURLParams() {
     return obj;
 };
 
+//给元素设置css样式（css方法） 获取元素到body的距离（offset方法）
+let utils = (function () {
+	function getCss(element, attr) {
+		let value = window.getComputedStyle(element)[attr],
+			reg = /^\d+(px|rem|em)?$/i;
+		if (reg.test(value)) {
+			value = parseFloat(value);
+		}
+		return value;
+	}
 
-//offset:获取元素距离body的左和上偏移量 Get the left and up offsets of the current element from the body
-function offset(element) {
-    //获取当前元素的父参照物和其距离父参照物的偏移
-    let parent = element.offsetParent,
-        top = element.offsettop,
-        left = element.offsetLeft;
-    //循环依次向上查找父参照物（一直到找不到为止）
-    while (parent) {
-        if (!/MSIE 8/.test(navigator.userAgent)) {
-            left += parent.clientLeft;
-            top += parent.clientTop;
-        };
-        //加上父参照物的偏移量
-        left += parent.offsetLeft;
-        top += parent.offsetTop;
-        //继续向上查找
-        parent = parent.offsetParent;
-    };
-    //把查找的结果返回
-    return {
-        top,
-        left
-    }
-};
+	function setCss(element, attr, value) {
+		if (attr === "opacity") {
+			element['style']['opacity'] = value;
+			element['style']['filter'] = `alpha(opacity=${value*100})`;
+			return;
+		}
+		let reg = /^(width|height|margin|padding)?(top|left|bottom|right)?$/i;
+		if (reg.test(attr)) {
+
+			if (!isNaN(value)) {
+				value += 'px';
+			}
+		}
+		element['style'][attr] = value;
+	}
+
+	function setGroupCss(element, options) {
+		for (let key in options) {
+			if (!options.hasOwnProperty(key)) break;
+			setCss(element, key, options[key]);
+		}
+	}
+
+	function css(element) {
+		let len = arguments.length,
+			attr = arguments[1],
+			value = arguments[2];
+		if (len >= 3) {
+			// 单一设置样式
+			setCss(element, attr, value);
+			return;
+		}
+		if (attr !== null && typeof attr === "object") {
+			// 批量设置
+			setGroupCss(element, attr);
+			return;
+		}
+		// 获取样式
+		return getCss(element, attr);
+	}
+
+	function offset(element) {
+		let parent = element.offsetParent,
+			top = element.offsetTop,
+			left = element.offsetLeft;
+		while (parent) {
+			if (!/MSIE 8/.test(navigator.userAgent)) {
+				left += parent.clientLeft;
+				top += parent.clientTop;
+			}
+			left += parent.offsetLeft;
+			top += parent.offsetTop;
+			parent = parent.offsetParent;
+		}
+		return {
+			top,
+			left
+		};
+	}
+	
+	return {
+		css,
+		offset
+	};
+})();
